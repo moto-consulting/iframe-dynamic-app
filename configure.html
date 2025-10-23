@@ -1,30 +1,96 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Configure Dynamic iFrame</title>
   <script src="https://res.cdn.office.net/teams-js/2.13.0/js/MicrosoftTeams.min.js"></script>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #1a1a1a;
+      --input-bg: #f9f9f9;
+      --input-border: #ccc;
+      --accent: #0078d4;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #2b2b2b;
+      --text-color: #ffffff;
+      --input-bg: #3a3a3a;
+      --input-border: #555;
+      --accent: #2899f5;
+    }
+
+    [data-theme="contrast"] {
+      --bg-color: #000000;
+      --text-color: #ffffff;
+      --input-bg: #000000;
+      --input-border: #ffffff;
+      --accent: #ffff00;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: "Segoe UI", sans-serif;
+      text-align: center;
+      margin: 40px;
+    }
+
+    h2 {
+      margin-bottom: 16px;
+    }
+
+    input[type="text"] {
+      width: 60%;
+      padding: 8px 10px;
+      font-size: 15px;
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      background-color: var(--input-bg);
+      color: var(--text-color);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 3px var(--accent);
+    }
+
+    #status {
+      font-size: 13px;
+      margin-top: 10px;
+      color: var(--text-color);
+      opacity: 0.8;
+    }
+  </style>
 </head>
-<body style="font-family:sans-serif; text-align:center; margin-top:40px;">
-  <h2>Dynamic iFrame – Configuration</h2>
+<body>
+  <h2>Dynamic iFrame Configuration</h2>
   <p>Enter the URL you want to embed:</p>
-  <input id="iframeUrl" type="text" placeholder="https://example.com" style="width:60%; padding:6px; font-size:14px;">
-  <p id="status" style="color:gray; font-size:13px; margin-top:10px;"></p>
+  <input id="iframeUrl" type="text" placeholder="https://example.com" />
+  <p id="status"></p>
 
   <script>
-    // Initialize Teams SDK
     microsoftTeams.app.initialize().then(() => {
+      // Detect and apply Teams theme
+      microsoftTeams.app.getContext().then((context) => {
+        document.body.setAttribute("data-theme", context.app.theme || "default");
+      });
+      microsoftTeams.app.registerOnThemeChangeHandler((theme) => {
+        document.body.setAttribute("data-theme", theme);
+      });
 
-      // Register onSave handler — called when user clicks "Save"
+      // Save handler
       microsoftTeams.pages.config.registerOnSaveHandler(async (saveEvent) => {
         const url = document.getElementById("iframeUrl").value.trim();
         if (!url) {
-          document.getElementById("status").innerText = "Please enter a valid URL before saving.";
+          document.getElementById("status").innerText = "Please enter a valid URL.";
           saveEvent.notifyFailure("URL missing");
           return;
         }
 
-        // Tell Teams what URL to load in the tab
         await microsoftTeams.pages.config.setConfig({
           contentUrl: `https://moto-consulting.github.io/iframe-dynamic-app/content.html?url=${encodeURIComponent(url)}`,
           websiteUrl: url,
@@ -35,17 +101,12 @@
         saveEvent.notifySuccess();
       });
 
-      // Enable the Save button immediately when input changes
+      // Enable Save button if input has content
       const input = document.getElementById("iframeUrl");
       input.addEventListener("input", () => {
-        if (input.value.trim().length > 0) {
-          microsoftTeams.pages.config.setValidityState(true);
-        } else {
-          microsoftTeams.pages.config.setValidityState(false);
-        }
+        microsoftTeams.pages.config.setValidityState(input.value.trim().length > 0);
       });
 
-      // Initially disable save until something is entered
       microsoftTeams.pages.config.setValidityState(false);
     });
   </script>
