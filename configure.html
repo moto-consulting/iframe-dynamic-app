@@ -1,39 +1,53 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Configure iFrame</title>
-    <script src="https://res.cdn.office.net/teams-js/2.17.0/js/MicrosoftTeams.min.js"></script>
-  </head>
-  <body style="font-family:sans-serif; padding:20px;">
-    <h3>iFrame konfigurieren</h3>
-    <label for="urlInput">Webseite-URL:</label><br>
-    <input id="urlInput" type="url" placeholder="https://ruwacbi.de.qlikcloud.com/dashboard" style="width:100%;padding:8px;margin-top:6px;"><br><br>
-    <button id="saveBtn" style="padding:10px 16px;">Speichern</button>
+<head>
+  <meta charset="UTF-8" />
+  <title>Configure Dynamic iFrame</title>
+  <script src="https://res.cdn.office.net/teams-js/2.13.0/js/MicrosoftTeams.min.js"></script>
+</head>
+<body style="font-family:sans-serif; text-align:center; margin-top:40px;">
+  <h2>Dynamic iFrame – Configuration</h2>
+  <p>Enter the URL you want to embed:</p>
+  <input id="iframeUrl" type="text" placeholder="https://example.com" style="width:60%; padding:6px; font-size:14px;">
+  <p id="status" style="color:gray; font-size:13px; margin-top:10px;"></p>
 
-    <script>
-      microsoftTeams.app.initialize();
+  <script>
+    // Initialize Teams SDK
+    microsoftTeams.app.initialize().then(() => {
 
-      const saveButton = document.getElementById("saveBtn");
-      const urlInput = document.getElementById("urlInput");
-
-      saveButton.onclick = async () => {
-        const url = urlInput.value.trim();
+      // Register onSave handler — called when user clicks "Save"
+      microsoftTeams.pages.config.registerOnSaveHandler(async (saveEvent) => {
+        const url = document.getElementById("iframeUrl").value.trim();
         if (!url) {
-          alert("Bitte gib eine gültige URL ein.");
+          document.getElementById("status").innerText = "Please enter a valid URL before saving.";
+          saveEvent.notifyFailure("URL missing");
           return;
         }
 
+        // Tell Teams what URL to load in the tab
         await microsoftTeams.pages.config.setConfig({
-          entityId: url,
-          contentUrl: `https://ruwacbi.de.qlikcloud.com/content.html?url=${encodeURIComponent(url)}`,
+          contentUrl: `https://moto-consulting.github.io/iframe-dynamic-app/content.html?url=${encodeURIComponent(url)}`,
           websiteUrl: url,
-          suggestedDisplayName: "iFrame",
-          removeUrl: "https://ruwacbi.de.qlikcloud.com/configure.html"
+          entityId: url,
+          suggestedDisplayName: "Dynamic iFrame"
         });
 
-        await microsoftTeams.pages.config.notifySuccess();
-      };
-    </script>
-  </body>
+        saveEvent.notifySuccess();
+      });
+
+      // Enable the Save button immediately when input changes
+      const input = document.getElementById("iframeUrl");
+      input.addEventListener("input", () => {
+        if (input.value.trim().length > 0) {
+          microsoftTeams.pages.config.setValidityState(true);
+        } else {
+          microsoftTeams.pages.config.setValidityState(false);
+        }
+      });
+
+      // Initially disable save until something is entered
+      microsoftTeams.pages.config.setValidityState(false);
+    });
+  </script>
+</body>
 </html>
