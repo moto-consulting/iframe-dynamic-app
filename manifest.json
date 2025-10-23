@@ -3,12 +3,12 @@
   "manifestVersion": "1.11",
   "version": "1.0.0",
   "id": "iframe-dynamic-app",
-  "packageName": "com.dynamic.iframe",
+  "packageName": "com.motoconsulting.iframe",
   "developer": {
     "name": "Dynamic iFrame App",
-    "websiteUrl": "https://ruwacbi.de.qlikcloud.com",
-    "privacyUrl": "https://ruwacbi.de.qlikcloud.com/privacy",
-    "termsOfUseUrl": "https://ruwacbi.de.qlikcloud.com/terms"
+    "websiteUrl": "https://moto-consulting.github.io",
+    "privacyUrl": "https://moto-consulting.github.io/privacy",
+    "termsOfUseUrl": "https://moto-consulting.github.io/terms"
   },
   "name": { "short": "Dynamic iFrame", "full": "Dynamic iFrame Embedder" },
   "description": {
@@ -17,10 +17,10 @@
   },
   "configurableTabs": [
     {
-      "configurationUrl": "https://ruwacbi.de.qlikcloud.com/configure.html",
+      "configurationUrl": "https://moto-consulting.github.io/iframe-dynamic-app/configure.html",
       "canUpdateConfiguration": true,
       "scopes": ["team", "groupchat"]
     }
   ],
-  "validDomains": ["ruwacbi.de.qlikcloud.com"]
+  "validDomains": ["moto-consulting.github.io"]
 }
