@@ -4,34 +4,68 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Qlik Dashboard</title>
-  <script src="https://unpkg.com/@qlik/embed-sdk"></script>
-  <style>
-    html, body {margin:0;height:100%;width:100%;}
-    #app {height:100vh;width:100vw;}
-  </style>
-</head>
-<body>
-  <div id="app"></div>
+
+  <!-- Qlik Embed SDK -->
   <script type="module">
     import { embed } from "https://unpkg.com/@qlik/embed-sdk";
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const appId = urlParams.get("appid");
-    const sheetId = urlParams.get("sheet");
+    // Liest die App- und Sheet-ID aus der URL
+    const params = new URLSearchParams(window.location.search);
+    const appId = params.get("appid");
+    const sheetId = params.get("sheet");
 
-    const app = await embed.connect({
-      host: "ruwacbi.de.qlikcloud.com",
-      authType: "OAuth2",
-      clientId: "<Application (Client) ID>",        // ← Azure App ID
-      redirectUri: window.location.origin + window.location.pathname
-    });
+    // Lade-Status anzeigen
+    document.body.innerHTML = `
+      <div id="loading" style="
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        height:100vh;
+        width:100vw;
+        font-family:sans-serif;
+        color:#444;
+        font-size:1.2rem;">
+        Dashboard wird geladen…
+      </div>
+    `;
 
-    await app.render({
-      type: "sheet",
-      elementId: "app",
-      appId,
-      sheetId
-    });
+    // Qlik Verbindung per OAuth2
+    (async () => {
+      try {
+        const app = await embed.connect({
+          host: "ruwacbi.de.qlikcloud.com",
+          authType: "OAuth2",
+          clientId: "78531452-5e13-4017-9dc5-3b139b4c0c23",  // ← Azure Entra App-ID hier einsetzen
+          redirectUri: window.location.origin + window.location.pathname,
+          issuer: "https://login.microsoftonline.com/97e010ed-98bc-444d-9319-b570409a1f1b/v2.0"
+        });
+
+        // Dashboard anzeigen
+        document.body.innerHTML = `<div id="app" style="height:100vh;width:100vw;"></div>`;
+        await app.render({
+          type: "sheet",
+          elementId: "app",
+          appId,
+          sheetId
+        });
+      } catch (err) {
+        console.error("Fehler beim Laden:", err);
+        document.body.innerHTML = `
+          <div style="text-align:center;padding:2rem;font-family:sans-serif;">
+            <h2 style="color:#b00;">Fehler beim Laden des Dashboards</h2>
+            <p>${err.message || "Bitte überprüfen Sie die Anmeldung oder Netzwerkverbindung."}</p>
+          </div>`;
+      }
+    })();
   </script>
+
+  <style>
+    body {
+      margin: 0;
+      background-color: #fff;
+    }
+  </style>
+</head>
+<body>
 </body>
 </html>
