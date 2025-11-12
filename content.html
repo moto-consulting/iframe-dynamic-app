@@ -1,19 +1,37 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>iFrame Content</title>
-    <style>
-      html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-      iframe { border: none; width: 100%; height: 100%; }
-    </style>
-  </head>
-  <body>
-    <iframe id="iframe" src=""></iframe>
-    <script>
-      const params = new URLSearchParams(window.location.search);
-      const url = params.get("url");
-      if (url) document.getElementById("iframe").src = url;
-    </script>
-  </body>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Qlik Dashboard</title>
+  <script src="https://unpkg.com/@qlik/embed-sdk"></script>
+  <style>
+    html, body {margin:0;height:100%;width:100%;}
+    #app {height:100vh;width:100vw;}
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module">
+    import { embed } from "https://unpkg.com/@qlik/embed-sdk";
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const appId = urlParams.get("appid");
+    const sheetId = urlParams.get("sheet");
+
+    const app = await embed.connect({
+      host: "ruwacbi.de.qlikcloud.com",
+      authType: "OAuth2",
+      clientId: "<Application (Client) ID>",        // ← Azure App ID
+      redirectUri: window.location.origin + window.location.pathname
+    });
+
+    await app.render({
+      type: "sheet",
+      elementId: "app",
+      appId,
+      sheetId
+    });
+  </script>
+</body>
 </html>
